@@ -1,10 +1,27 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
 from typing import Any
 
+from dotenv import load_dotenv
+
+load_dotenv(Path(".env"))
+
 try:
-    from langfuse.decorators import observe, langfuse_context
+    from langfuse import get_client, observe
+
+    class _LangfuseContextAdapter:
+        def update_current_trace(self, **kwargs: Any) -> None:
+            get_client().update_current_trace(**kwargs)
+
+        def update_current_observation(self, **kwargs: Any) -> None:
+            get_client().update_current_span(**kwargs)
+
+        def flush(self) -> None:
+            get_client().flush()
+
+    langfuse_context = _LangfuseContextAdapter()
 except Exception:  # pragma: no cover
     def observe(*args: Any, **kwargs: Any):
         def decorator(func):
@@ -16,6 +33,9 @@ except Exception:  # pragma: no cover
             return None
 
         def update_current_observation(self, **kwargs: Any) -> None:
+            return None
+
+        def flush(self) -> None:
             return None
 
     langfuse_context = _DummyContext()

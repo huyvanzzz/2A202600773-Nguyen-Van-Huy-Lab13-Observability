@@ -29,7 +29,7 @@ class LabAgent:
     def run(self, user_id: str, feature: str, session_id: str, message: str) -> AgentResult:
         started = time.perf_counter()
         docs = retrieve(message)
-        prompt = f"Feature={feature}\nDocs={docs}\nQuestion={message}"
+        prompt = self._build_prompt(feature=feature, docs=docs, message=message)
         response = self.llm.generate(prompt)
         quality_score = self._heuristic_quality(message, response.text, docs)
         latency_ms = int((time.perf_counter() - started) * 1000)
@@ -41,9 +41,14 @@ class LabAgent:
             tags=["lab", feature, self.model],
         )
         langfuse_context.update_current_observation(
-            metadata={"doc_count": len(docs), "query_preview": summarize_text(message)},
-            usage_details={"input": response.usage.input_tokens, "output": response.usage.output_tokens},
+            metadata={
+                "doc_count": len(docs),
+                "query_preview": summarize_text(message),
+                "tokens_in": response.usage.input_tokens,
+                "tokens_out": response.usage.output_tokens,
+            },
         )
+        langfuse_context.flush()
 
         metrics.record_request(
             latency_ms=latency_ms,
@@ -78,3 +83,9 @@ class LabAgent:
         if "[REDACTED" in answer:
             score -= 0.2
         return round(max(0.0, min(1.0, score)), 2)
+
+    def _build_prompt(self, feature: str, docs: list[str], message: str) -> str:
+        docs_text = " ".join(docs)
+        optimized_docs = docs_text[:100]
+        optimized_message = message[:120]
+        return f"F={feature}\nD={optimized_docs}\nQ={optimized_message}"

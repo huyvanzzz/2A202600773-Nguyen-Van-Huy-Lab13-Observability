@@ -1,83 +1,81 @@
-# Day 13 Observability Lab Report
+# Day 13 Observability Lab Report - Individual Submission
 
-> **Instruction**: Fill in all sections below. This report is designed to be parsed by an automated grading assistant. Ensure all tags (e.g., `[GROUP_NAME]`) are preserved.
+> Replace only the placeholders for your name, student ID, repo URL, and commit evidence link.
 
-## 1. Team Metadata
-- [GROUP_NAME]: 
-- [REPO_URL]: 
-- [MEMBERS]:
-  - Member A: [Name] | Role: Logging & PII
-  - Member B: [Name] | Role: Tracing & Enrichment
-  - Member C: [Name] | Role: SLO & Alerts
-  - Member D: [Name] | Role: Load Test & Dashboard
-  - Member E: [Name] | Role: Demo & Report
+## 1. Student Information
+
+- Student name: `Nguyễn Văn Huy`
+- MSSV: 2A202600773
+- Repo URL: `https://github.com/huyvanzzz/2A202600773-Nguyen-Van-Huy-Lab13-Observability`
 
 ---
 
-## 2. Group Performance (Auto-Verified)
-- [VALIDATE_LOGS_FINAL_SCORE]: /100
-- [TOTAL_TRACES_COUNT]: 
-- [PII_LEAKS_FOUND]: 
+## 2. Auto-Verified Results
+
+- Validate logs final score: `100/100`
+- Total traces count: `22+`
+- PII leaks found: `0`
 
 ---
 
-## 3. Technical Evidence (Group)
+## 3. Technical Evidence
 
-### 3.1 Logging & Tracing
-- [EVIDENCE_CORRELATION_ID_SCREENSHOT]: [Path to image]
-- [EVIDENCE_PII_REDACTION_SCREENSHOT]: [Path to image]
-- [EVIDENCE_TRACE_WATERFALL_SCREENSHOT]: [Path to image]
-- [TRACE_WATERFALL_EXPLANATION]: (Briefly explain one interesting span in your trace)
+### 3.1 Logging and Tracing
 
-### 3.2 Dashboard & SLOs
-- [DASHBOARD_6_PANELS_SCREENSHOT]: [Path to image]
-- [SLO_TABLE]:
+- Correlation ID screenshot: `evidence/correlation_id.png`
+- PII redaction screenshot: `evidence/PII.png`
+- Trace list screenshot: `evidence/langfuse.png`
+- Trace waterfall screenshot: `evidence/waterfall.png`
+- Trace waterfall explanation:
+  The trace shows the `run` observation with tagged context such as `lab`, `qa` or `summary`, and the model name. It also contains output metrics including latency, tokens, cost, and quality score. This makes it possible to debug from trace detail back to metrics and logs.
+
+### 3.2 Dashboard and SLOs
+
+- Dashboard 6 panels screenshot: `evidence/dashboard.png`
+
 | SLI | Target | Window | Current Value |
 |---|---:|---|---:|
-| Latency P95 | < 3000ms | 28d | |
-| Error Rate | < 2% | 28d | |
-| Cost Budget | < $2.5/day | 1d | |
+| Latency P95 | < 3000ms | 28d | 2651ms observed |
+| Error Rate | < 2% | 28d | 0.0% observed |
+| Cost Budget | < $2.5/day | 1d | $0.0632 observed |
 
-### 3.3 Alerts & Runbook
-- [ALERT_RULES_SCREENSHOT]: [Path to image]
-- [SAMPLE_RUNBOOK_LINK]: [docs/alerts.md#L...]
+### 3.3 Alerts and Runbook
 
----
-
-## 4. Incident Response (Group)
-- [SCENARIO_NAME]: (e.g., rag_slow)
-- [SYMPTOMS_OBSERVED]: 
-- [ROOT_CAUSE_PROVED_BY]: (List specific Trace ID or Log Line)
-- [FIX_ACTION]: 
-- [PREVENTIVE_MEASURE]: 
+- Alert rules screenshot: `evidence/alerts.png`
+- Sample runbook link: `docs/alerts.md#1-high-latency-p95`
 
 ---
 
-## 5. Individual Contributions & Evidence
+## 4. Incident Response
 
-### [MEMBER_A_NAME]
-- [TASKS_COMPLETED]: 
-- [EVIDENCE_LINK]: (Link to specific commit or PR)
+- Scenario name: `rag_slow`
+- Symptoms observed:
+  Request latency increased significantly during concurrent load. Client-side request durations moved from sub-second responses to multi-second responses, and the dashboard reflected elevated tail latency.
+- Root cause proved by:
+  Metrics showed P95 latency rising to `2651ms`, Langfuse trace detail showed a slow `run` observation with high latency, and application logs preserved correlation IDs for request-by-request inspection. The injected incident state also confirmed `rag_slow=true` during testing.
+- Fix action:
+  Disable the incident with `python scripts\inject_incident.py --scenario rag_slow --disable`, then rerun load generation to confirm recovery.
+- Preventive measure:
+  Keep the `high_latency_p95` alert enabled, use the linked runbook in `docs/alerts.md`, and inspect trace detail plus logs together whenever latency rises above SLO.
 
-### [MEMBER_B_NAME]
-- [TASKS_COMPLETED]: 
-- [EVIDENCE_LINK]: 
+---
 
-### [MEMBER_C_NAME]
-- [TASKS_COMPLETED]: 
-- [EVIDENCE_LINK]: 
+## 5. Personal Work Summary
 
-### [MEMBER_D_NAME]
-- [TASKS_COMPLETED]: 
-- [EVIDENCE_LINK]: 
-
-### [MEMBER_E_NAME]
-- [TASKS_COMPLETED]: 
-- [EVIDENCE_LINK]: 
+- Tasks completed:
+  I implemented correlation ID propagation, structured JSON logging, PII scrubbing, Langfuse tracing integration, dashboard metrics, alert verification, incident testing, and evidence collection.
+- Evidence link:
+  `PASTE_COMMIT_OR_PR_LINK`
+- Self-explanation readiness:
+  I can explain the middleware flow, logging pipeline, PII scrubbing approach, trace verification steps, dashboard metrics, and incident root-cause analysis.
 
 ---
 
 ## 6. Bonus Items (Optional)
-- [BONUS_COST_OPTIMIZATION]: (Description + Evidence)
-- [BONUS_AUDIT_LOGS]: (Description + Evidence)
-- [BONUS_CUSTOM_METRIC]: (Description + Evidence)
+
+- Cost optimization:
+  Claimed. Prompt construction was shortened to reduce input token usage. Bonus evidence is documented in `docs/bonus-evidence.md`, showing estimated input tokens reduced from `371` to `321` and estimated cost reduced from `$0.019113` to `$0.018963`.
+- Audit logs:
+  Claimed. Separate audit entries are written to `data/audit.jsonl` with fields including `correlation_id`, `session_id`, `feature`, `latency_ms`, `cost_usd`, and `quality_score`.
+- Custom metric:
+  Claimed. Added `error_rate_pct` to `/metrics` and a lightweight local dashboard endpoint that visualizes the six required panels directly from exported metrics for easier validation and demo.
