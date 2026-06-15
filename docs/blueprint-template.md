@@ -65,7 +65,7 @@
 - Tasks completed:
   I implemented correlation ID propagation, structured JSON logging, PII scrubbing, Langfuse tracing integration, dashboard metrics, alert verification, incident testing, and evidence collection.
 - Evidence link:
-  `PASTE_COMMIT_OR_PR_LINK`
+  `https://github.com/huyvanzzz/2A202600773-Nguyen-Van-Huy-Lab13-Observability`
 - Self-explanation readiness:
   I can explain the middleware flow, logging pipeline, PII scrubbing approach, trace verification steps, dashboard metrics, and incident root-cause analysis.
 
